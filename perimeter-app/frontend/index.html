@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perimeter — Attendance Console</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <div class="app">
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="map-topbar">
+        <div class="brand"><span class="mark">PERIMETER</span><span class="sub">Attendance Console</span></div>
+        <div class="acc-badge mono" id="accBadge">GPS: —</div>
+      </div>
+      <div class="map-toolbar" id="organizerToolbar">
+        <button id="btnStart" class="primary">Start Boundary Walk</button>
+        <button id="btnMark" class="amber" disabled>Drop Marker Here</button>
+        <button id="btnFinish" disabled>Close Polygon</button>
+        <button id="btnClear" class="danger">Reset</button>
+      </div>
+    </div>
+
+    <div class="console">
+      <div class="console-header">
+        <div class="tabs">
+          <button class="tab active" data-tab="organizer">Organizer</button>
+          <button class="tab" data-tab="attendee">Attendee</button>
+        </div>
+      </div>
+
+      <!-- ORGANIZER PANEL -->
+      <div id="panel-organizer" class="panel">
+        <div class="section">
+          <div class="label">Backend</div>
+          <input id="apiBase" class="text-input mono" value="http://localhost:8000" />
+        </div>
+        <div class="section">
+          <div class="label">Event Name</div>
+          <input id="eventName" class="text-input" placeholder="e.g. CS301 Lecture Hall" />
+          <div class="label" style="margin-top:14px;">Confirmation Threshold</div>
+          <div class="threshold-input">
+            <input type="range" id="thresholdSlider" min="10" max="300" step="5" value="60">
+            <div class="val mono" id="thresholdVal">60s</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="label mono">Telemetry</div>
+          <div class="readout-row"><span class="k">Position</span><span class="v mono" id="posReadout">no fix</span>
+          </div>
+          <div class="readout-row"><span class="k">GPS accuracy</span><span class="v mono" id="accReadout">—</span>
+          </div>
+        </div>
+        <div class="section">
+          <div class="label mono">Boundary Points (<span id="vertexCount">0</span>)</div>
+          <div class="vertex-list" id="vertexList"></div>
+        </div>
+        <div class="section">
+          <button id="btnCreateEvent" class="primary full" disabled>Create Event</button>
+          <div id="createdEventBox" class="event-box hidden">
+            <div class="label">Event Created</div>
+            <div class="readout-row"><span class="k">Event ID</span><span class="v mono" id="createdEventId">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDEE PANEL -->
+      <div id="panel-attendee" class="panel hidden">
+        <div class="section">
+          <div class="label">Backend</div>
+          <input id="apiBaseAttendee" class="text-input mono" value="http://localhost:8000" />
+        </div>
+        <div class="section">
+          <div class="label">Event ID</div>
+          <input id="attendEventId" class="text-input mono" placeholder="e.g. 1" />
+          <div class="label" style="margin-top:14px;">Your Name / ID</div>
+          <input id="attendUserId" class="text-input" placeholder="e.g. maurice" />
+          <button id="btnJoin" class="primary full" style="margin-top:14px;">Start Check-In</button>
+        </div>
+        <div class="section">
+          <div class="label">Status</div>
+          <div class="status-block">
+            <div class="ring-wrap">
+              <div class="ring-sweep" id="ringSweep"></div>
+              <svg viewBox="0 0 72 72">
+                <circle class="ring-bg" cx="36" cy="36" r="30"></circle>
+                <circle class="ring-fg" id="ringFg" cx="36" cy="36" r="30" stroke-dasharray="188.5"
+                  stroke-dashoffset="188.5"></circle>
+              </svg>
+            </div>
+            <div class="status-text">
+              <div class="state standby" id="stateText">STANDBY</div>
+              <div class="detail" id="stateDetail">Enter event details and start check-in</div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="readout-row"><span class="k">Inside boundary</span><span class="v mono"
+              id="insideReadout">—</span></div>
+          <div class="readout-row"><span class="k">Dwell time</span><span class="v mono" id="dwellReadout">0s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="log">
+        <div class="label">Event Log</div>
+        <div id="logList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

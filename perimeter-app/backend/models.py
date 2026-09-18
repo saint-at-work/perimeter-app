@@ -1,44 +1,42 @@
 """
-Database tables.
+Lightweight domain objects kept independent of the storage layer.
 
-Event        -> one event, with its polygon stored as JSON text (list of [lat, lng])
-CheckIn      -> a running record of one user's presence inside an event's boundary
-AttendanceRecord -> a confirmed attendance (dwell threshold was met)
+The old SQLModel/table variants are gone — persistence now goes through the
+Supabase (PostgREST) wrapper in database.py. These dataclasses just give the
+API layer typed, self-describing values.
 """
-from typing import Optional, List
-from datetime import datetime
-from sqlmodel import SQLModel, Field
-import json
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import List, Optional
 
 
-class Event(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+@dataclass
+class Event:
+    id: int
     name: str
-    polygon_json: str            # JSON-encoded list of [lat, lng]
-    threshold_seconds: int = 60  # how long a user must stay inside to be "confirmed"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    def polygon(self) -> List[List[float]]:
-        return json.loads(self.polygon_json)
+    polygon: List[List[float]]
+    threshold_seconds: int
+    created_at: datetime
 
 
-class CheckIn(SQLModel, table=True):
-    """Tracks an in-progress (unconfirmed) presence session for one user at one event."""
-    id: Optional[int] = Field(default=None, primary_key=True)
-    event_id: int = Field(foreign_key="event.id")
-    # any string identifying the attendee (name, device id, etc.)
+@dataclass
+class CheckIn:
+    event_id: int
     user_id: str
-    entered_at: datetime         # when this continuous "inside" streak started
+    entered_at: datetime
     last_ping_at: datetime
     last_lat: float
     last_lng: float
     last_accuracy: Optional[float] = None
 
 
-class AttendanceRecord(SQLModel, table=True):
-    """A confirmed attendance — dwell threshold was met."""
-    id: Optional[int] = Field(default=None, primary_key=True)
-    event_id: int = Field(foreign_key="event.id")
+@dataclass
+class AttendanceRecord:
+    event_id: int
     user_id: str
-    confirmed_at: datetime = Field(default_factory=datetime.utcnow)
+    confirmed_at: datetime
     entered_at: datetime

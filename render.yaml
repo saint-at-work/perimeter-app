@@ -1,0 +1,25 @@
+# Render Blueprint — backend deploys as a Python web service.
+# This file must live at the REPO ROOT. Push the repo, then in Render:
+# New -> Blueprint -> select repo.
+# Fill SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (and CORS_ORIGINS) as secrets.
+# The frontend deploys separately on Vercel with its project root set to
+# frontend/ (see frontend/vercel.json).
+
+services:
+  - type: web
+    name: perimeter-backend
+    runtime: python
+    plan: free
+    rootDir: perimeter-app/backend
+    healthCheckPath: /health
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT} --timeout 120 --access-logfile - main:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: CORS_ORIGINS
+        value: https://perimeter-frontend.vercel.app
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

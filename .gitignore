@@ -1,0 +1,2 @@
+# Repo-root ignores (outer folder). Inner project has its own .gitignore.
+.venv/
